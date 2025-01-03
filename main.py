@@ -55,6 +55,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Templates
 templates = Jinja2Templates(directory="templates")
+templates.env.filters['render_markdown'] = render_markdown
 
 # OpenAI setup
 openai.api_key = os.getenv("OPENAI_API_KEY")
