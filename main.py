@@ -51,12 +51,54 @@ templates = Jinja2Templates(directory="templates")
 # OpenAI setup
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
+# Public home route
 @app.get("/", response_class=HTMLResponse)
-async def home(request: Request, current_user: User = Depends(get_current_user)):
-    entries = current_user.entries
+async def home(request: Request):
     return templates.TemplateResponse(
         "home.html", 
-        {"request": request, "user": current_user, "entries": entries}
+        {"request": request, "user": None}
+    )
+
+# Login route
+@app.get("/login", response_class=HTMLResponse)
+async def login_page(request: Request):
+    return templates.TemplateResponse(
+        "login.html", 
+        {"request": request}
+    )
+
+# Login form processing
+@app.post("/token")
+async def login(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(User.email == form_data.username).first()
+    if not user or not verify_password(form_data.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.email}, expires_delta=access_token_expires
+    )
+    response = RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
+    response.set_cookie(
+        key="access_token",
+        value=f"Bearer {access_token}",
+        httponly=True
+    )
+    return response
+
+# Registration routes
+@app.get("/register", response_class=HTMLResponse)
+async def register_page(request: Request):
+    return templates.TemplateResponse(
+        "register.html", 
+        {"request": request}
     )
 
 @app.post("/register")
@@ -79,24 +121,6 @@ async def register(
     
     return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
-@app.post("/token")
-async def login(
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    db: Session = Depends(get_db)
-):
-    user = db.query(User).filter(User.email == form_data.username).first()
-    if not user or not verify_password(form_data.password, user.hashed_password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.email}, expires_delta=access_token_expires
-    )
-    return {"access_token": access_token, "token_type": "bearer"}
 
 @app.post("/entries")
 async def create_entry(
