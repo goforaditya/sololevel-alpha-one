@@ -7,14 +7,19 @@
     <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css') }}">
 </head>
 <body>
-    <nav>
-        <div class="nav-brand">Solo Level</div>
-        {% if user %}
-            <div class="nav-links">
-                <span>{{ user.username }}</span>
-                <a href="/logout">Logout</a>
-            </div>
-        {% endif %}
+    <nav class="bg-gray-800 p-4">
+      <div class="container mx-auto flex justify-between items-center">
+        <a href="/" class="text-white font-bold text-xl">Solo Level</a>
+        <div class="space-x-4">
+          {% if user %}
+            <span class="text-white">{{ user.username }}</span>
+            <a href="/logout" class="text-white hover:text-gray-300">Logout</a>
+          {% else %}
+            <a href="/login" class="text-white hover:text-gray-300">Login</a>
+            <a href="/register" class="text-white hover:text-gray-300">Register</a>
+          {% endif %}
+        </div>
+      </div>
     </nav>
     
     <main>
