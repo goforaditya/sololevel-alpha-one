@@ -51,11 +51,9 @@ templates = Jinja2Templates(directory="templates")
 # OpenAI setup
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-# Public home route
 @app.get("/", response_class=HTMLResponse)
-async def home(request: Request, current_user: User = Depends(get_current_user)):
+async def home(request: Request, current_user: Optional[User] = Depends(get_current_user)):
     db = next(get_db())
-    
     if current_user:
         entries = db.query(Entry).filter(Entry.user_id == current_user.id).order_by(Entry.created_at.desc()).all()
         return templates.TemplateResponse(
@@ -68,7 +66,6 @@ async def home(request: Request, current_user: User = Depends(get_current_user))
             "home.html", 
             {"request": request, "user": None, "public_entries": public_entries}
         )
-
 
 # Login route
 @app.get("/login", response_class=HTMLResponse)
