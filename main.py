@@ -39,7 +39,12 @@ def check_rate_limit(ip_address: str) -> bool:
     post_rate_limits[ip_address].append(current_time)
     return True
 
-
+def render_markdown(content: str) -> str:
+    allowed_tags = bleach.sanitizer.ALLOWED_TAGS + ['p', 'br', 'blockquote', 'pre', 'code']
+    allowed_attrs = bleach.sanitizer.ALLOWED_ATTRIBUTES
+    html_content = markdown.markdown(content)
+    return bleach.clean(html_content, tags=allowed_tags, attributes=allowed_attrs)
+  
 # Create tables
 Base.metadata.create_all(bind=engine)
 
