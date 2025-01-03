@@ -27,11 +27,16 @@ RATE_LIMIT_WINDOW = 3600  # 1 hour in seconds
 # Add this function for rate limiting
 def check_rate_limit(ip_address: str) -> bool:
     current_time = time.time()
+    if ip_address not in post_rate_limits:
+        post_rate_limits[ip_address] = []
     post_rate_limits[ip_address] = [
-        timestamp for timestamp in post_rate_limits[ip_address]
-        if current_time - timestamp < RATE_LIMIT_WINDOW
+        t for t in post_rate_limits[ip_address] 
+        if current_time - t < RATE_LIMIT_WINDOW
     ]
-    return len(post_rate_limits[ip_address]) < RATE_LIMIT_POSTS and post_rate_limits[ip_address].append(current_time)
+    if len(post_rate_limits[ip_address]) >= RATE_LIMIT_POSTS:
+        return False
+    post_rate_limits[ip_address].append(current_time)
+    return True
 
 
 # Create tables
