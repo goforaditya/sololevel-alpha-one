@@ -53,13 +53,17 @@
         </div>
         
         <form action="/entries" method="POST" class="space-y-4">
-          <textarea 
+<!--           <textarea 
             name="content" 
             rows="6" 
             class="w-full p-3 border rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
-            placeholder="What's on your mind? (Max 5000 characters)" 
+            placeholder="" 
             required
-          ></textarea>
+          ></textarea> -->
+          <textarea id="markdown-editor" name="content" rows="6" 
+            class="w-full p-3 border rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="What's on your mind? (Max 5000 characters)" required></textarea>
+          
           <div class="form-group">
             <label class="flex items-center hover:cursor-pointer">
               <input type="checkbox" name="is_public" class="mr-2 w-4 h-4 text-blue-600">
@@ -212,5 +216,8 @@ document.getElementById('message-input').addEventListener('keypress', function(e
         sendMessage();
     }
 });
+</script>
+<script>
+    const simplemde = new SimpleMDE({ element: document.getElementById("markdown-editor") });
 </script>
 {% endblock %}
