@@ -1,82 +1,137 @@
 {% extends "base.html" %}
 {% block title %}Home{% endblock %}
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-  <div class="max-w-3xl mx-auto space-y-8">
-    <!-- Chat Interface -->
-    <div class="bg-white rounded-lg shadow p-6">
-      <div id="chat-messages" class="h-64 overflow-y-auto space-y-2 mb-4 border rounded p-2"></div>
-      <div class="flex gap-2">
-        <input type="text" id="message-input" class="flex-1 p-2 border rounded" placeholder="Tell me about your day...">
-        <button onclick="sendMessage()" class="bg-blue-500 text-white px-4 py-2 rounded">Send</button>
-      </div>
-      <button onclick="createEntry()" class="mt-4 bg-green-500 text-white px-4 py-2 rounded">Create Entry</button>
-    </div>
-    <!-- New Entry Section -->
-    <div class="bg-white rounded-lg shadow p-6">
-      <h2 class="text-2xl font-bold mb-4">New Entry</h2>
-      {% if user %}
-        <p>Posting as: {{ user.username }}</p>
-      {% else %}
-        <p>Posting anonymously</p>
-        <p><a href="/login">Login</a> to track your progress and get AI suggestions!</p>
-      {% endif %}
-      
-      <form action="/entries" method="POST" class="space-y-4">
-        <textarea name="content" rows="6" class="w-full p-2 border rounded" placeholder="What's on your mind? (Max 5000 characters)" required></textarea>
-        <div class="form-group">
-          <label class="flex items-center">
-            <input type="checkbox" name="is_public" class="mr-2">
-            Make this entry public
-          </label>
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+  <div class="container mx-auto px-4 py-8">
+    <div class="max-w-3xl mx-auto space-y-8">
+      <!-- Chat Interface -->
+      <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+        <div class="text-center mb-6">
+          <h1 class="text-3xl font-bold text-gray-800">Solo Level</h1>
+          <p class="text-gray-600 mt-2">Your AI-powered journal for personal growth</p>
         </div>
-        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Save Entry</button>
-      </form>
-    </div>
+        
+        <div id="chat-messages" class="h-96 overflow-y-auto space-y-4 mb-6 rounded-lg bg-gray-50 p-4 border">
+          <!-- Messages will be inserted here via JavaScript -->
+        </div>
+        
+        <div class="space-y-4">
+          <div class="flex gap-3">
+            <textarea 
+              id="message-input"
+              class="flex-1 p-3 border rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              rows="3"
+              placeholder="Tell me about your day..."
+            ></textarea>
+            <button 
+              onclick="sendMessage()"
+              class="bg-blue-600 hover:bg-blue-700 text-white px-6 rounded-lg flex items-center justify-center transition-colors"
+            >
+              Send
+            </button>
+          </div>
+          
+          <button 
+            onclick="createEntry()"
+            class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-medium transition-colors"
+          >
+            Create Journal Entry
+          </button>
+        </div>
+      </div>
 
-    <!-- Entries Section -->
-    <div class="bg-white rounded-lg shadow p-6">
-      {% if user %}
-        <h2 class="text-2xl font-bold mb-4">Your Entries</h2>
-        {% for entry in user_entries %}
-          <div class="entry-card mb-4 p-4 border rounded">
-            <div class="entry-content">{{ entry.content }}</div>
-            <div class="entry-meta text-sm text-gray-600 mt-2">
-              <span>{{ entry.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
-              {% if entry.is_public %}
-                <span class="public-badge ml-2 px-2 py-1 bg-green-100 text-green-800 rounded-full">Public</span>
+      <!-- Manual Entry Section -->
+      <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+        <h2 class="text-2xl font-bold mb-4 text-gray-800">New Entry</h2>
+        <div class="mb-4">
+          {% if user %}
+            <p class="text-gray-600">Posting as: <span class="font-medium">{{ user.username }}</span></p>
+          {% else %}
+            <p class="text-gray-600">Posting anonymously</p>
+            <p class="mt-2"><a href="/login" class="text-blue-600 hover:text-blue-700">Login</a> to track your progress and get AI suggestions!</p>
+          {% endif %}
+        </div>
+        
+        <form action="/entries" method="POST" class="space-y-4">
+          <textarea 
+            name="content" 
+            rows="6" 
+            class="w-full p-3 border rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+            placeholder="What's on your mind? (Max 5000 characters)" 
+            required
+          ></textarea>
+          <div class="form-group">
+            <label class="flex items-center hover:cursor-pointer">
+              <input type="checkbox" name="is_public" class="mr-2 w-4 h-4 text-blue-600">
+              <span class="text-gray-700">Make this entry public</span>
+            </label>
+          </div>
+          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition-colors">
+            Save Entry
+          </button>
+        </form>
+      </div>
+
+      <!-- Entries Display -->
+      <div class="grid md:grid-cols-2 gap-6">
+        {% if user %}
+        <!-- User Entries -->
+        <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+          <h2 class="text-2xl font-bold mb-6 text-gray-800">Your Journey</h2>
+          <div class="space-y-4">
+            {% for entry in user_entries %}
+            <div class="entry-card bg-gray-50 rounded-lg p-4 hover:shadow-md transition-shadow">
+              <div class="entry-content text-gray-800">{{ entry.content }}</div>
+              <div class="entry-meta flex justify-between items-center mt-3 text-sm text-gray-600">
+                <span>{{ entry.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                {% if entry.is_public %}
+                  <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Public</span>
+                {% endif %}
+              </div>
+              
+              {% if entry.activities %}
+              <div class="activities mt-4 border-t pt-4">
+                <h3 class="font-bold text-gray-800 mb-3">Suggested Activities:</h3>
+                {% for activity in entry.activities %}
+                <div class="activity-card bg-white p-4 rounded-lg shadow-sm mb-3">
+                  <p class="text-gray-800 mb-3">{{ activity.description }}</p>
+                  <form action="/activities/{{ activity.id }}/progress" method="POST" class="space-y-3">
+                    <input type="range" name="progress" min="0" max="100" value="{{ activity.progress }}" 
+                           class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                    <input type="text" name="notes" placeholder="Add notes (optional)" 
+                           value="{{ activity.notes or '' }}" 
+                           class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <button type="submit" 
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium transition-colors">
+                      Update Progress
+                    </button>
+                  </form>
+                </div>
+                {% endfor %}
+              </div>
               {% endif %}
             </div>
-            
-            {% if entry.activities %}
-            <div class="activities mt-4">
-              <h3 class="font-bold">Suggested Activities:</h3>
-              {% for activity in entry.activities %}
-              <div class="activity-card mt-2 p-2 bg-gray-50 rounded">
-                <p>{{ activity.description }}</p>
-                <form action="/activities/{{ activity.id }}/progress" method="POST" class="mt-2">
-                  <input type="range" name="progress" min="0" max="100" value="{{ activity.progress }}" class="w-full">
-                  <input type="text" name="notes" placeholder="Add notes (optional)" value="{{ activity.notes or '' }}" class="w-full mt-2 p-1 border rounded">
-                  <button type="submit" class="mt-2 bg-blue-500 text-white px-3 py-1 rounded">Update Progress</button>
-                </form>
-              </div>
-              {% endfor %}
-            </div>
-            {% endif %}
-          </div>
-        {% endfor %}
-      {% endif %}
-
-      <h2 class="text-2xl font-bold mb-4">Public Entries</h2>
-      {% for entry in public_entries %}
-        <div class="entry-card mb-4 p-4 border rounded">
-          <div class="entry-content">{{ entry.content }}</div>
-          <div class="entry-meta text-sm text-gray-600 mt-2">
-            <span>{{ entry.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
-            <span class="public-badge ml-2 px-2 py-1 bg-green-100 text-green-800 rounded-full">Public</span>
+            {% endfor %}
           </div>
         </div>
-      {% endfor %}
+        {% endif %}
+
+        <!-- Public Entries -->
+        <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+          <h2 class="text-2xl font-bold mb-6 text-gray-800">Community Stories</h2>
+          <div class="space-y-4">
+            {% for entry in public_entries %}
+            <div class="entry-card bg-gray-50 rounded-lg p-4 hover:shadow-md transition-shadow">
+              <div class="entry-content text-gray-800">{{ entry.content }}</div>
+              <div class="entry-meta flex justify-between items-center mt-3 text-sm text-gray-600">
+                <span>{{ entry.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Public</span>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -84,9 +139,28 @@
 <script>
 const messages = [];
 
+function displayMessage(role, content) {
+    const chatMessages = document.getElementById('chat-messages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'}`;
+    
+    messageDiv.innerHTML = `
+        <div class="max-w-[80%] rounded-lg p-4 ${
+            role === 'user' 
+                ? 'bg-blue-600 text-white' 
+                : 'bg-white border text-gray-800'
+        }">
+            ${content}
+        </div>
+    `;
+    
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
 async function sendMessage() {
     const input = document.getElementById('message-input');
-    const message = input.value;
+    const message = input.value.trim();
     if (!message) return;
 
     messages.push({"role": "user", "content": message});
@@ -108,6 +182,8 @@ async function sendMessage() {
 }
 
 async function createEntry() {
+    if (messages.length === 0) return;
+    
     const lastEntry = messages[messages.length - 1].content;
     const form = document.createElement('form');
     form.method = 'POST';
@@ -118,23 +194,23 @@ async function createEntry() {
     content.name = 'content';
     content.value = lastEntry;
     
+    const isPublic = document.createElement('input');
+    isPublic.type = 'hidden';
+    isPublic.name = 'is_public';
+    isPublic.value = 'false';
+    
     form.appendChild(content);
+    form.appendChild(isPublic);
     document.body.appendChild(form);
     form.submit();
 }
 
-function displayMessage(role, content) {
-    const chatMessages = document.getElementById('chat-messages');
-    const messageDiv = document.createElement('div');
-    messageDiv.className = role === 'user' ? 'text-right' : 'text-left';
-    messageDiv.innerHTML = `
-        <div class="inline-block ${role === 'user' ? 'bg-blue-100' : 'bg-gray-100'} rounded-lg p-2 max-w-3/4">
-            ${content}
-        </div>
-    `;
-    chatMessages.appendChild(messageDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-}
+// Add event listener for Enter key
+document.getElementById('message-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+    }
+});
 </script>
-
 {% endblock %}
