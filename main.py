@@ -273,3 +273,21 @@ async def update_progress(
     
     db.commit()
     return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
+
+@app.post("/chat/entry")
+async def generate_entry(
+    request: Request,
+    messages: list = Body(...),
+    current_user: Union[User, None] = Depends(get_current_user)
+):
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant that helps users journal their day. Convert their chat messages into a well-formatted journal entry."},
+                *messages
+            ]
+        )
+        return {"entry": response.choices[0].message.content}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
