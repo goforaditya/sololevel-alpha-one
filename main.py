@@ -214,6 +214,7 @@ async def create_entry(
                 {"role": "system", "content": "You are a helpful assistant that suggests 3 concrete, actionable activities based on journal entries. Keep suggestions specific and measurable."},
                 {"role": "user", "content": content}]
         )
+        logger.info(f"OpenAI response: {response}")
         print(response)
         suggestions = response.choices[0].message.content.split('\n')
         # Your existing OpenAI suggestion code here
