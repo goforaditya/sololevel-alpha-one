@@ -1,70 +1,74 @@
 {% extends "base.html" %}
 {% block title %}Home{% endblock %}
 {% block content %}
-<div class="container">
-    <section class="entry-form">
-        <h2>New Entry</h2>
-        {% if user %}
-            <p>Posting as: {{ user.username }}</p>
-        {% else %}
-            <p>Posting anonymously</p>
-            <p><a href="/login">Login</a> to track your progress and get AI suggestions!</p>
-        {% endif %}
-        
-        <form action="/entries" method="POST">
-            <textarea name="content" rows="6" placeholder="What's on your mind? (Max 5000 characters)" required></textarea>
-            <div class="form-group">
-                <label>
-                    <input type="checkbox" name="is_public">
-                    Make this entry public
-                </label>
-            </div>
-            <button type="submit">Save Entry</button>
-        </form>
-    </section>
+<div class="container mx-auto px-4 py-8">
+  <div class="max-w-3xl mx-auto space-y-8">
+    <!-- New Entry Section -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-2xl font-bold mb-4">New Entry</h2>
+      {% if user %}
+        <p>Posting as: {{ user.username }}</p>
+      {% else %}
+        <p>Posting anonymously</p>
+        <p><a href="/login">Login</a> to track your progress and get AI suggestions!</p>
+      {% endif %}
+      
+      <form action="/entries" method="POST" class="space-y-4">
+        <textarea name="content" rows="6" class="w-full p-2 border rounded" placeholder="What's on your mind? (Max 5000 characters)" required></textarea>
+        <div class="form-group">
+          <label class="flex items-center">
+            <input type="checkbox" name="is_public" class="mr-2">
+            Make this entry public
+          </label>
+        </div>
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Save Entry</button>
+      </form>
+    </div>
 
-    <section class="entries">
-        {% if user %}
-            <h2>Your Entries</h2>
-            {% for entry in entries %}
-            <div class="entry-card">
-                <div class="entry-content">{{ entry.content }}</div>
-                <div class="entry-meta">
-                    <span>{{ entry.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
-                    {% if entry.is_public %}
-                        <span class="public-badge">Public</span>
-                    {% endif %}
-                </div>
-                
-                {% if entry.activities %}
-                <div class="activities">
-                    <h3>Suggested Activities:</h3>
-                    {% for activity in entry.activities %}
-                    <div class="activity-card">
-                        <p>{{ activity.description }}</p>
-                        <form action="/activities/{{ activity.id }}/progress" method="POST">
-                            <input type="range" name="progress" min="0" max="100" value="{{ activity.progress }}">
-                            <input type="text" name="notes" placeholder="Add notes (optional)" value="{{ activity.notes or '' }}">
-                            <button type="submit">Update Progress</button>
-                        </form>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% endif %}
+    <!-- Entries Section -->
+    <div class="bg-white rounded-lg shadow p-6">
+      {% if user %}
+        <h2 class="text-2xl font-bold mb-4">Your Entries</h2>
+        {% for entry in user_entries %}
+          <div class="entry-card mb-4 p-4 border rounded">
+            <div class="entry-content">{{ entry.content }}</div>
+            <div class="entry-meta text-sm text-gray-600 mt-2">
+              <span>{{ entry.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+              {% if entry.is_public %}
+                <span class="public-badge ml-2 px-2 py-1 bg-green-100 text-green-800 rounded-full">Public</span>
+              {% endif %}
             </div>
-            {% endfor %}
-        {% else %}
-            <h2>Public Entries</h2>
-            {% for entry in public_entries %}
-            <div class="entry-card">
-                <div class="entry-content">{{ entry.content }}</div>
-                <div class="entry-meta">
-                    <span>{{ entry.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
-                    <span class="public-badge">Public</span>
-                </div>
+            
+            {% if entry.activities %}
+            <div class="activities mt-4">
+              <h3 class="font-bold">Suggested Activities:</h3>
+              {% for activity in entry.activities %}
+              <div class="activity-card mt-2 p-2 bg-gray-50 rounded">
+                <p>{{ activity.description }}</p>
+                <form action="/activities/{{ activity.id }}/progress" method="POST" class="mt-2">
+                  <input type="range" name="progress" min="0" max="100" value="{{ activity.progress }}" class="w-full">
+                  <input type="text" name="notes" placeholder="Add notes (optional)" value="{{ activity.notes or '' }}" class="w-full mt-2 p-1 border rounded">
+                  <button type="submit" class="mt-2 bg-blue-500 text-white px-3 py-1 rounded">Update Progress</button>
+                </form>
+              </div>
+              {% endfor %}
             </div>
-            {% endfor %}
-        {% endif %}
-    </section>
+            {% endif %}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <h2 class="text-2xl font-bold mb-4">Public Entries</h2>
+      {% for entry in public_entries %}
+        <div class="entry-card mb-4 p-4 border rounded">
+          <div class="entry-content">{{ entry.content }}</div>
+          <div class="entry-meta text-sm text-gray-600 mt-2">
+            <span>{{ entry.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+            <span class="public-badge ml-2 px-2 py-1 bg-green-100 text-green-800 rounded-full">Public</span>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
 </div>
 {% endblock %}
