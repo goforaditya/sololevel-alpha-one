@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Background -->
+  <rect width="32" height="32" rx="6" fill="#4F46E5"/>
+  
+  <!-- Book/Journal shape -->
+  <path d="M8 8v16h16V8H8zm2 2h12v12H10V10z" fill="white"/>
+  
+  <!-- Level up arrow -->
+  <path d="M16 18l-4-4h8l-4 4z" fill="white"/>
+  
+  <!-- Writing lines -->
+  <path d="M12 13h8M12 15h8" stroke="white" stroke-width="1"/>
+</svg>
