@@ -220,10 +220,12 @@ async function sendMessage() {
             body: JSON.stringify({ messages })
         });
         const data = await response.json();
-        displayMessage("assistant", data.entry);
+        const assistantMessage = data.entry || 'Sorry, I didn’t catch that. Could you rephrase?';
+        displayMessage('assistant', assistantMessage);
         messages.push({"role": "assistant", "content": data.entry});
     } catch (error) {
         console.error('Error:', error);
+        displayMessage('assistant', 'There was an error processing your request. Please try again.');
     }
 }
 
