@@ -223,6 +223,7 @@ async function sendMessage() {
         const assistantMessage = data.entry || 'Sorry, I didn’t catch that. Could you rephrase?';
         displayMessage('assistant', assistantMessage);
         messages.push({"role": "assistant", "content": data.entry});
+        console.log('Assistant:', assistantMessage)
     } catch (error) {
         console.error('Error:', error);
         displayMessage('assistant', 'There was an error processing your request. Please try again.');
