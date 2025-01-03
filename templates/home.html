@@ -241,13 +241,17 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
             
             // Add assistant's response to UI and messages array
-            const assistantMessage = { role: 'assistant', content: data.response };
+            // const assistantMessage = { role: 'assistant', content: data.response | "Sorry OpenAI Error" };
+            const assistantMessage = { 
+                role: 'assistant', 
+                content: data.error ? "Sorry, there was an error: " + data.error : data.response 
+            };
             messages.push(assistantMessage);
             displayMessage(assistantMessage);
 
         } catch (error) {
             console.error('Error:', error);
-            displayMessage({ role: 'assistant', content: 'Sorry, there was an error. Please try again.' });
+            displayMessage({ role: 'assistant', content: 'Sorry, there was an error. Please try again.' + error });
         }
     });
 
