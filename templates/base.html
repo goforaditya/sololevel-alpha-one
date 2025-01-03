@@ -3,30 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solo Level - {% block title %}{% endblock %}</title>
+    <title>{% block title %}{% endblock %} - Solo Level</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css') }}">
-</head>
-<body>
-    <nav class="bg-gray-800 p-4">
-      <div class="container mx-auto flex justify-between items-center">
-        <a href="/" class="text-white font-bold text-xl">Solo Level</a>
-        <div class="space-x-4">
-          {% if user %}
-            <span class="text-white">{{ user.username }}</span>
-            <a href="/logout" class="text-white hover:text-gray-300">Logout</a>
-          {% else %}
-            <a href="/login" class="text-white hover:text-gray-300">Login</a>
-            <a href="/register" class="text-white hover:text-gray-300">Register</a>
-          {% endif %}
-        </div>
-      </div>
-    </nav>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     
-    <main>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .nav-blur {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
+    <!-- Fixed Navbar with blur effect -->
+    <nav class="fixed top-0 left-0 right-0 bg-white/80 nav-blur border-b border-gray-200 z-50">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6">
+            <div class="flex justify-between items-center py-3">
+                <!-- Logo Section -->
+                <div class="flex items-center space-x-2">
+                    <a href="/" class="flex items-center space-x-2">
+                        <img src="/static/favicon.svg" alt="Solo Level" class="w-8 h-8">
+                        <span class="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                            Solo Level
+                        </span>
+                    </a>
+                </div>
+
+                <!-- Navigation Links -->
+                <div class="flex items-center space-x-6">
+                    {% if user %}
+                        <span class="text-gray-600">{{ user.username }}</span>
+                        <a href="/logout" 
+                           class="px-4 py-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors">
+                            Logout
+                        </a>
+                    {% else %}
+                        <a href="/login" 
+                           class="px-4 py-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors">
+                            Login
+                        </a>
+                        <a href="/register" 
+                           class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+                            Get Started
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content with padding for fixed navbar -->
+    <main class="pt-16">
         {% block content %}{% endblock %}
     </main>
 
-    <script src="{{ url_for('static', path='/js/main.js') }}"></script>
+    <!-- Footer -->
+    <footer class="mt-12 py-6 text-center text-gray-600">
+        <div class="max-w-5xl mx-auto px-4">
+            <p>© 2025 Solo Level. Level up your life, one day at a time.</p>
+        </div>
+    </footer>
 </body>
 </html>
