@@ -8,6 +8,8 @@ from datetime import timedelta
 from typing import Optional, Union
 import openai
 import os
+# Add at the top with other imports
+import time
 # from recaptcha import verify_recaptcha
 
 from database import engine, get_db, Base
@@ -25,17 +27,11 @@ RATE_LIMIT_WINDOW = 3600  # 1 hour in seconds
 # Add this function for rate limiting
 def check_rate_limit(ip_address: str) -> bool:
     current_time = time.time()
-    # Remove old timestamps
     post_rate_limits[ip_address] = [
         timestamp for timestamp in post_rate_limits[ip_address]
         if current_time - timestamp < RATE_LIMIT_WINDOW
     ]
-    # Check if too many posts
-    if len(post_rate_limits[ip_address]) >= RATE_LIMIT_POSTS:
-        return False
-    # Add new timestamp
-    post_rate_limits[ip_address].append(current_time)
-    return True
+    return len(post_rate_limits[ip_address]) < RATE_LIMIT_POSTS and post_rate_limits[ip_address].append(current_time)
 
 
 # Create tables
