@@ -232,41 +232,48 @@ async def create_entry(
 
     return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
 
-# @app.post("/entries")
-# async def create_entry(
-#     content: str = Form(...),
-#     is_public: bool = Form(False),
-#     current_user: User = Depends(get_current_user),
-#     db: Session = Depends(get_db)
-# ):
-#     # Create entry
-#     entry = Entry(content=content, is_public=is_public, user_id=current_user.id)
-#     db.add(entry)
-#     db.commit()
+@app.get("/entries/{entry_id}", response_class=HTMLResponse)
+async def view_entry(
+    request: Request,
+    entry_id: int,
+    current_user: Union[User, None] = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    # Fetch the entry
+    entry = db.query(Entry).filter(Entry.id == entry_id).first()
+    if not entry:
+        raise HTTPException(status_code=404, detail="Entry not found")
+        
+    # Check if user has permission to view
+    if not entry.is_public and (not current_user or current_user.id != entry.user_id):
+        raise HTTPException(status_code=403, detail="Not authorized to view this entry")
     
-#     # Generate activity suggestions using OpenAI
-#     response = openai.ChatCompletion.create(
-#         model="gpt-4o-mini",
-#         messages=[
-#             {"role": "system", "content": "You are a helpful assistant that suggests 3 concrete, actionable activities based on journal entries. Keep suggestions specific and measurable."},
-#             {"role": "user", "content": content}
-#         ]
-#     )
+    # Fetch the author if it exists
+    author = None
+    if entry.user_id:
+        author = db.query(User).filter(User.id == entry.user_id).first()
     
-#     suggestions = response.choices[0].message.content.split('\n')
+    # Fetch activities if they exist and user has permission
+    activities = []
+    if current_user and current_user.id == entry.user_id:
+        activities = db.query(Activity).filter(Activity.entry_id == entry.id).all()
     
-#     # Create activities from suggestions
-#     for suggestion in suggestions:
-#         if suggestion.strip():
-#             activity = Activity(
-#                 description=suggestion,
-#                 user_id=current_user.id,
-#                 entry_id=entry.id
-#             )
-#             db.add(activity)
+    # Fetch comments
+    comments = db.query(Comment).filter(
+        Comment.entry_id == entry_id
+    ).order_by(Comment.created_at.desc()).all()
     
-#     db.commit()
-#     return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
+    return templates.TemplateResponse(
+        "entry.html",
+        {
+            "request": request,
+            "entry": entry,
+            "user": current_user,
+            "author": author,
+            "activities": activities,
+            "comments": comments
+        }
+    )
 
 @app.post("/activities/{activity_id}/progress")
 async def update_progress(
@@ -317,3 +324,37 @@ async def generate_entry(
     except Exception as e:
         logger.error(f"Error generating entry: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/entries/{entry_id}/comments")
+async def create_comment(
+    entry_id: int,
+    content: str = Form(...),
+    current_user: User = Depends(get_current_user) or None,
+    db: Session = Depends(get_db)
+):
+    # Check if entry exists
+    entry = db.query(Entry).filter(Entry.id == entry_id).first()
+    if not entry:
+        raise HTTPException(status_code=404, detail="Entry not found")
+        
+    # Create anonymous ID if no user
+    anonymous_user_id = None
+    is_anonymous = False
+    if not current_user:
+        is_anonymous = True
+        client_ip = request.client.host
+        unique_string = f"{client_ip}:{time.time()}"
+        anonymous_user_id = hashlib.sha256(unique_string.encode()).hexdigest()[:12]
+
+    comment = Comment(
+        content=content,
+        entry_id=entry_id,
+        user_id=current_user.id if current_user else None,
+        anonymous_user_id=anonymous_user_id,
+        is_anonymous=is_anonymous
+    )
+    
+    db.add(comment)
+    db.commit()
+    
+    return RedirectResponse(url=f"/entries/{entry_id}", status_code=status.HTTP_303_SEE_OTHER)
