@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="container">
+    <section class="entry-form">
+        <h2>New Entry</h2>
+        {% if user %}
+            <p>Posting as: {{ user.username }}</p>
+        {% else %}
+            <p>Posting anonymously</p>
+            <p><a href="/login">Login</a> to track your progress and get AI suggestions!</p>
+        {% endif %}
+        
+        <form action="/entries" method="POST">
+            <textarea name="content" rows="6" placeholder="What's on your mind? (Max 5000 characters)" required></textarea>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="is_public">
+                    Make this entry public
+                </label>
+            </div>
+            <button type="submit">Save Entry</button>
+        </form>
+    </section>
+
+    <section class="entries">
+        <h2>Your Entries</h2>
+        {% for entry in entries %}
+        <div class="entry-card">
+            <div class="entry-content">{{ entry.content }}</div>
+            <div class="entry-meta">
+                <span>{{ entry.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                {% if entry.is_public %}
+                    <span class="public-badge">Public</span>
+                {% endif %}
+            </div>
+            
+            {% if entry.activities %}
+            <div class="activities">
+                <h3>Suggested Activities:</h3>
+                {% for activity in entry.activities %}
+                <div class="activity-card">
+                    <p>{{ activity.description }}</p>
+                    <form action="/activities/{{ activity.id }}/progress" method="POST">
+                        <input type="range" name="progress" min="0" max="100" value="{{ activity.progress }}">
+                        <input type="text" name="notes" placeholder="Add notes (optional)" value="{{ activity.notes or '' }}">
+                        <button type="submit">Update Progress</button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </section>
+</div>
+{% endblock %}
