@@ -15,6 +15,7 @@ class User(Base):
     
     entries = relationship("Entry", back_populates="user")
     activities = relationship("Activity", back_populates="user")
+    comments = relationship("Comment", back_populates="user")
 
 class Entry(Base):
     __tablename__ = "entries"
@@ -29,6 +30,7 @@ class Entry(Base):
     activities = relationship("Activity", back_populates="entry")
     anonymous_user_id = Column(String, nullable=True)  # Store hashed IP or session ID
     is_anonymous = Column(Boolean, default=False)
+    comments = relationship("Comment", back_populates="entry")
 
 class Activity(Base):
     __tablename__ = "activities"
