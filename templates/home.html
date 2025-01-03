@@ -15,7 +15,7 @@
     background-color: #f5f5f5;
     padding: 2px 4px;
     border-radius: 4px;
-    font-family: "Courier New", Courier, monospace;
+    font-family: monospace;
 }
 
 .entry-content pre {
@@ -23,22 +23,41 @@
     padding: 1rem;
     border-radius: 6px;
     overflow-x: auto;
-    font-family: "Courier New", Courier, monospace;
+    font-family: monospace;
 }
 
 .entry-content ul {
     list-style-type: disc;
     padding-left: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 .entry-content ol {
     list-style-type: decimal;
     padding-left: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 .entry-content a {
     color: #1a73e8;
     text-decoration: underline;
+}
+
+.entry-content blockquote {
+    border-left: 4px solid #e2e8f0;
+    padding-left: 1rem;
+    margin: 1rem 0;
+    color: #4a5568;
+}
+
+/* Animation classes */
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 </style>
 
@@ -48,82 +67,98 @@
       <!-- Chat Interface -->
       <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6 border border-gray-100">
         <div class="text-center mb-4 sm:mb-6">
-            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Solo Level</h1>
-            <p class="text-gray-600 mt-2 text-sm sm:text-base">Your AI-powered journal for personal growth</p>
+          <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Solo Level</h1>
+          <p class="text-gray-600 mt-2 text-sm sm:text-base">Your AI-powered journal for personal growth</p>
         </div>
         
         <div id="chat-messages" class="h-72 sm:h-96 overflow-y-auto space-y-3 mb-4 sm:mb-6 rounded-lg bg-gray-50 p-3 sm:p-4 border">
-            <!-- Messages will be inserted here via JavaScript -->
+          <!-- Messages will be inserted here via JavaScript -->
         </div>
         
         <form id="chat-form" class="space-y-3 sm:space-y-4">
-            <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
-                <textarea 
-                    id="message"
-                    class="w-full p-2 sm:p-3 border rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
-                    rows="3"
-                    placeholder="Tell me about your day..."
-                ></textarea>
-                <button 
-                    type="submit"
-                    class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 sm:px-4 rounded-lg flex items-center justify-center transition-colors text-sm sm:text-base gap-2"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="rotate-45">
-                        <line x1="22" y1="2" x2="11" y2="13"></line>
-                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                    </svg>
-                    <span class="sm:hidden">Send</span>
-                </button>
-            </div>
-            
+          <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
+            <textarea 
+              id="message"
+              class="w-full p-2 sm:p-3 border rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
+              rows="3"
+              placeholder="Tell me about your day..."
+            ></textarea>
             <button 
-                onclick="createEntry()"
-                class="w-full bg-green-600 hover:bg-green-700 text-white py-2 sm:py-3 rounded-lg font-medium transition-colors text-sm sm:text-base flex items-center justify-center gap-2"
+              type="submit"
+              class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 sm:px-4 rounded-lg flex items-center justify-center transition-colors text-sm sm:text-base gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                </svg>
-                Create Journal Entry
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="rotate-45">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+              <span class="sm:hidden">Send</span>
             </button>
+          </div>
+          
+          <button 
+            type="button"
+            onclick="createEntry()"
+            class="w-full bg-green-600 hover:bg-green-700 text-white py-2 sm:py-3 rounded-lg font-medium transition-colors text-sm sm:text-base flex items-center justify-center gap-2"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+            Create Journal Entry
+          </button>
         </form>
       </div>
 
       <!-- Manual Entry Section -->
-<div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-  <h2 class="text-2xl font-bold mb-4 text-gray-800">New Entry</h2>
-  <div class="mb-4">
-      {% if user %}
-          <p class="text-gray-600">Posting as: <span class="font-medium">{{ user.username }}</span></p>
-      {% else %}
-          <p class="text-gray-600">Posting anonymously</p>
-          <p class="mt-2"><a href="/login" class="text-blue-600 hover:text-blue-700">Login</a> to track your progress and get AI suggestions!</p>
-      {% endif %}
-  </div>
-  
-  <form id="entry-form" class="space-y-4">
-      <div class="form-group">
-          <textarea 
+      <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+        <h2 class="text-2xl font-bold mb-4 text-gray-800">New Entry</h2>
+        <div class="mb-4">
+          {% if user %}
+            <p class="text-gray-600">Posting as: <span class="font-medium">{{ user.username }}</span></p>
+          {% else %}
+            <p class="text-gray-600">Posting anonymously</p>
+            <p class="mt-2">
+              <a href="/login" class="text-blue-600 hover:text-blue-700 underline">Login</a> 
+              to track your progress and get AI suggestions!
+            </p>
+          {% endif %}
+        </div>
+        
+        <form id="entry-form" action="/entries" method="POST" class="space-y-4">
+          <div class="form-group">
+            <textarea 
               id="markdown-editor" 
               name="content" 
               rows="6"
               class="w-full p-3 border rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="What's on your mind? (Max 5000 characters)"
-          ></textarea>
-      </div>
-      
-      <div class="form-group">
-          <label class="flex items-center hover:cursor-pointer">
-              <input type="checkbox" name="is_public" class="mr-2 w-4 h-4 text-blue-600">
+              maxlength="5000"
+              required
+            ></textarea>
+            <div class="text-sm text-gray-500 mt-1">
+              <span id="char-count">0</span>/5000 characters
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="flex items-center hover:cursor-pointer">
+              <input 
+                type="checkbox" 
+                name="is_public" 
+                class="mr-2 w-4 h-4 text-blue-600 focus:ring-blue-500 rounded"
+              >
               <span class="text-gray-700">Make this entry public</span>
-          </label>
-      </div>
+            </label>
+          </div>
 
-      <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition-colors">
-          Save Entry
-      </button>
-  </form>
-</div>
+          <button 
+            type="submit" 
+            class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Save Entry
+          </button>
+        </form>
+      </div>
 
       <!-- Entries Display -->
       <div class="grid md:grid-cols-2 gap-6">
@@ -133,16 +168,18 @@
           <h2 class="text-2xl font-bold mb-6 text-gray-800">Your Journey</h2>
           <div class="space-y-4">
             {% for entry in user_entries %}
-            <a href="/entries/{{ entry.id }}" class="block hover:bg-gray-50 transition-colors">
-            <div class="entry-card bg-gray-50 rounded-lg p-4 mb-4">
-              <div class="entry-content text-gray-800">{{ render_markdown(entry.content) | safe }}</div>
-              <div class="entry-meta flex justify-between items-center mt-3 text-sm text-gray-600">
-                <span>{{ entry.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
-                {% if entry.is_public %}
-                  <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Public</span>
-                {% endif %}
-                <h3>{{ entry.user_id.username if entry.user_id else "Anonymous" }}</h3>
-              </div>
+            <div class="entry-card bg-gray-50 hover:bg-gray-100 rounded-lg p-4 transition-colors">
+              <a href="/entries/{{ entry.id }}" class="block">
+                <div class="entry-content prose max-w-none text-gray-800">
+                  {{ entry.content | render_markdown | safe }}
+                </div>
+                <div class="entry-meta flex justify-between items-center mt-3 text-sm text-gray-600">
+                  <span>{{ entry.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                  {% if entry.is_public %}
+                    <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Public</span>
+                  {% endif %}
+                </div>
+              </a>
               
               {% if entry.activities %}
               <div class="activities mt-4 border-t pt-4">
@@ -151,13 +188,28 @@
                 <div class="activity-card bg-white p-4 rounded-lg shadow-sm mb-3">
                   <p class="text-gray-800 mb-3">{{ activity.description }}</p>
                   <form action="/activities/{{ activity.id }}/progress" method="POST" class="space-y-3">
-                    <input type="range" name="progress" min="0" max="100" value="{{ activity.progress }}" 
-                           class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
-                    <input type="text" name="notes" placeholder="Add notes (optional)" 
-                           value="{{ activity.notes or '' }}" 
-                           class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <button type="submit" 
-                            class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium transition-colors">
+                    <div class="flex items-center gap-2">
+                      <input 
+                        type="range" 
+                        name="progress" 
+                        min="0" 
+                        max="100" 
+                        value="{{ activity.progress }}"
+                        class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                      >
+                      <span class="text-sm text-gray-600">{{ activity.progress }}%</span>
+                    </div>
+                    <input 
+                      type="text" 
+                      name="notes" 
+                      placeholder="Add notes (optional)" 
+                      value="{{ activity.notes or '' }}"
+                      class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                    <button 
+                      type="submit"
+                      class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium transition-colors"
+                    >
                       Update Progress
                     </button>
                   </form>
@@ -166,7 +218,6 @@
               </div>
               {% endif %}
             </div>
-            </a>
             {% endfor %}
           </div>
         </div>
@@ -177,15 +228,23 @@
           <h2 class="text-2xl font-bold mb-6 text-gray-800">Community Stories</h2>
           <div class="space-y-4">
             {% for entry in public_entries %}
-            <a href="/entries/{{ entry.id }}" class="block hover:bg-gray-50 transition-colors"></a>
-            <div class="entry-card bg-gray-50 rounded-lg p-4 mb-4">
-              <div class="entry-content text-gray-800">{{ entry.content }}</div>
-              <div class="entry-meta flex justify-between items-center mt-3 text-sm text-gray-600">
-                <span>{{ entry.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
-                <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Public</span>
-              </div>
+            <div class="entry-card bg-gray-50 hover:bg-gray-100 rounded-lg p-4 transition-colors">
+              <a href="/entries/{{ entry.id }}" class="block">
+                <div class="entry-content prose max-w-none text-gray-800">
+                  {{ entry.content | render_markdown | safe }}
+                </div>
+                <div class="entry-meta flex justify-between items-center mt-3 text-sm text-gray-600">
+                  <span>{{ entry.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                  <span class="text-gray-500">
+                    {% if entry.is_anonymous %}
+                      Anonymous
+                    {% else %}
+                      {{ entry.user.username }}
+                    {% endif %}
+                  </span>
+                </div>
+              </a>
             </div>
-          </a>
             {% endfor %}
           </div>
         </div>
@@ -195,192 +254,257 @@
 </div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Initialize SimpleMDE first
-    const simplemde = new SimpleMDE({ 
-        element: document.getElementById("markdown-editor"),
+    document.addEventListener('DOMContentLoaded', function() {
+      const chatMessages = document.getElementById('chat-messages');
+      const chatForm = document.getElementById('chat-form');
+      const messageInput = document.getElementById('message');
+      const entryForm = document.getElementById('entry-form');
+      const markdownEditor = document.getElementById('markdown-editor');
+      const charCount = document.getElementById('char-count');
+      
+      // Initialize SimpleMDE
+      const simplemde = new SimpleMDE({ 
+        element: markdownEditor,
         spellChecker: false,
         status: false,
         placeholder: "What's on your mind? (Max 5000 characters)",
-        initialValue: ""
-    });
-
-    const chatMessages = document.getElementById('chat-messages');
-    const chatForm = document.getElementById('chat-form');
-    const messageInput = document.getElementById('message');
-    const entryForm = document.getElementById('entry-form');
+        toolbar: ["bold", "italic", "heading", "|", "quote", "unordered-list", "ordered-list", "|", "preview"],
+        initialValue: "",
+        forceSync: true
+      });
     
-    // Initialize messages array
-    let messages = [
-        { role: 'assistant', content: "Hi! I'm here to help. How are you feeling today?" }
-    ];
-
-    // Function to display a message
-    function displayMessage(message) {
+      // Initialize messages array
+      let messages = [
+        { role: 'assistant', content: "Hi! I'm here to help you journal. How are you feeling today?" }
+      ];
+    
+      // Function to display a message with animation
+      function displayMessage(message) {
         const messageDiv = document.createElement('div');
-        messageDiv.className = `max-w-[85%] sm:max-w-[80%] rounded-lg p-3 text-sm sm:text-base ${
-            message.role === 'user' 
-                ? 'bg-blue-600 text-white ml-auto' 
-                : 'bg-white border text-gray-800'
+        messageDiv.className = `max-w-[85%] sm:max-w-[80%] rounded-lg p-3 text-sm sm:text-base fade-in ${
+          message.role === 'user' 
+            ? 'bg-blue-600 text-white ml-auto' 
+            : 'bg-white border text-gray-800'
         }`;
         messageDiv.textContent = message.content;
         chatMessages.appendChild(messageDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-
-    // Function to handle message submission
-    async function handleSubmit() {
+      }
+    
+      // Function to handle message submission
+      async function handleSubmit(e) {
+        if (e) e.preventDefault();
+        
         const message = messageInput.value.trim();
         if (!message) return;
-
+    
         const submitButton = chatForm.querySelector('button[type="submit"]');
         submitButton.disabled = true;
-
+    
         try {
-            const userMessage = { role: 'user', content: message };
-            messages.push(userMessage);
-            displayMessage(userMessage);
-            messageInput.value = '';
-
-            console.log('Sending messages:', messages);
-
-            const response = await fetch('/chat/entry', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(messages)
-            });
-
-            console.log('Response status:', response.status);
-            const data = await response.text();
-            console.log('Response data:', data);
-
-            if (!response.ok) {
-                throw new Error(data || 'Failed to get response');
-            }
-
-            const assistantMessage = { 
-                role: 'assistant', 
-                content: data 
-            };
-            messages.push(assistantMessage);
-            displayMessage(assistantMessage);
-
+          const userMessage = { role: 'user', content: message };
+          messages.push(userMessage);
+          displayMessage(userMessage);
+          messageInput.value = '';
+    
+          const response = await fetch('/chat/entry', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(messages)
+          });
+    
+          if (!response.ok) {
+            throw new Error(await response.text() || 'Failed to get response');
+          }
+    
+          const data = await response.json();
+          const assistantMessage = { 
+            role: 'assistant', 
+            content: data 
+          };
+          messages.push(assistantMessage);
+          displayMessage(assistantMessage);
+    
         } catch (error) {
-            console.error('Chat error:', error);
-            displayMessage({ 
-                role: 'assistant', 
-                content: `Sorry, there was an error: ${error.message}` 
-            });
+          console.error('Chat error:', error);
+          displayMessage({ 
+            role: 'assistant', 
+            content: `Sorry, there was an error: ${error.message}` 
+          });
         } finally {
-            submitButton.disabled = false;
-            messageInput.style.height = 'auto';
+          submitButton.disabled = false;
+          messageInput.style.height = 'auto';
         }
-    }
+      }
+    
+      // Create entry from chat
+      // Update the createEntry function
+    window.createEntry = async function() {
+    // Disable the create entry button
+    const createButton = document.querySelector('button[onclick="createEntry()"]');
+    const originalButtonText = createButton.innerHTML;
+    createButton.innerHTML = `
+        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Creating Entry...
+    `;
+    createButton.disabled = true;
 
-    // Define createEntry function in window scope
-    window.createEntry = function() {
-        const content = messages.map(msg => msg.content).join('\n\n');
-        simplemde.value(content);
-        
-        // Scroll to the entry form
-        document.getElementById('entry-form').scrollIntoView({ 
+    try {
+        // Send the messages to create an entry
+        const response = await fetch('/api/entries', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(messages)
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Failed to create entry');
+        }
+
+        const entry = await response.json();
+
+        // Show success message
+        const successMessage = { 
+            role: 'assistant', 
+            content: 'I\'ve created a journal entry for you! You can find it in your entries list below.' 
+        };
+        messages.push(successMessage);
+        displayMessage(successMessage);
+
+        // Clear the chat messages except for the initial greeting
+        messages = messages.slice(0, 1);
+        while (chatMessages.children.length > 1) {
+            chatMessages.removeChild(chatMessages.lastChild);
+        }
+
+        // Scroll to the entries section and reload to show new entry
+        document.querySelector('.entries-section').scrollIntoView({ 
             behavior: 'smooth',
             block: 'start'
         });
-    };
 
-    // Event Listeners
-    chatForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        handleSubmit();
-    });
+        // Reload the entries section after a short delay
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
 
-    messageInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            handleSubmit();
+    } catch (error) {
+        console.error('Error creating entry:', error);
+        
+        // Show error message in chat
+        const errorMessage = { 
+            role: 'assistant', 
+            content: `Sorry, there was an error creating your entry: ${error.message}` 
+        };
+        messages.push(errorMessage);
+        displayMessage(errorMessage);
+    } finally {
+        // Reset the create entry button
+        createButton.innerHTML = originalButtonText;
+        createButton.disabled = false;
+    }
+};
+    
+      // Handle character count
+      simplemde.codemirror.on('change', function() {
+        const content = simplemde.value();
+        const count = content.length;
+        charCount.textContent = count;
+        
+        // Visual feedback for character limit
+        if (count > 4900) {
+          charCount.classList.add('text-yellow-600');
+        } else if (count > 5000) {
+          charCount.classList.add('text-red-600');
+        } else {
+          charCount.classList.remove('text-yellow-600', 'text-red-600');
         }
-    });
-
-    messageInput.addEventListener('input', function() {
+      });
+    
+      // Auto-resize message input
+      messageInput.addEventListener('input', function() {
         this.style.height = 'auto';
         this.style.height = (this.scrollHeight) + 'px';
-    });
-
-    entryForm.addEventListener('submit', async (e) => {
+      });
+    
+      // Handle form submissions
+      chatForm.addEventListener('submit', handleSubmit);
+    
+      messageInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          handleSubmit();
+        }
+      });
+    
+      entryForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        const submitButton = entryForm.querySelector('button[type="submit"]');
+        const content = simplemde.value().trim();
+        if (!content) {
+          alert('Please enter some content for your entry');
+          return;
+        }
+    
+        if (content.length > 5000) {
+          alert('Content exceeds 5000 characters. Please shorten your entry.');
+          return;
+        }
+    
+        const submitButton = this.querySelector('button[type="submit"]');
         const originalButtonText = submitButton.textContent;
         submitButton.textContent = 'Saving...';
         submitButton.disabled = true;
-
-        try {
-            const formData = new FormData();
-            formData.append('content', simplemde.value());
-            formData.append('is_public', entryForm.querySelector('input[name="is_public"]').checked);
-
-            const response = await fetch('/entries', {
-                method: 'POST',
-                body: formData
-            });
-
-            console.log('Entry submission response:', response.status);
-            const data = await response.json();
-            console.log('Entry submission data:', data);
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Failed to save entry');
-            }
-
-            alert('Entry saved successfully!');
-            simplemde.value('');
-            entryForm.querySelector('input[name="is_public"]').checked = false;
-
-        } catch (error) {
-            console.error('Error saving entry:', error);
-            alert(`Error saving entry: ${error.message}`);
-        } finally {
-            submitButton.textContent = originalButtonText;
-            submitButton.disabled = false;
-        }
-    });
-
-    // Display initial message
-    displayMessage(messages[0]);
-});
-</script>
-
-<script>
-  // Initialize SimpleMDE with proper configuration
-const simplemde = new SimpleMDE({ 
-    element: document.getElementById("markdown-editor"),
-    spellChecker: false,
-    status: false,
-    placeholder: "What's on your mind? (Max 5000 characters)",
-    initialValue: "",
-    forceSync: true, // Ensures content is synced with textarea
-    hideIcons: ["guide", "fullscreen", "side-by-side"], // Simplify toolbar
-    showIcons: ["bold", "italic", "heading", "quote", "unordered-list", "ordered-list"],
-    renderingConfig: {
-        singleLineBreaks: false,
-        codeSyntaxHighlighting: false,
-    }
-});
-
-// Add custom validation
-document.getElementById('entry-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const content = simplemde.value().trim();
     
-    if (!content) {
-        alert('Please enter some content for your entry');
-        return;
-    }
-
-    // Rest of your submission code...
-});
-</script>
-{% endblock %}
+        try {
+          const formData = new FormData(this);
+          formData.set('content', content); // Use SimpleMDE content
+    
+          const response = await fetch('/entries', {
+            method: 'POST',
+            body: formData
+          });
+    
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || 'Failed to save entry');
+          }
+    
+          // Clear form and reset
+          simplemde.value('');
+          this.querySelector('input[name="is_public"]').checked = false;
+          
+          // Refresh the page to show new entry
+          window.location.reload();
+    
+        } catch (error) {
+          console.error('Error saving entry:', error);
+          alert(`Error saving entry: ${error.message}`);
+        } finally {
+          submitButton.textContent = originalButtonText;
+          submitButton.disabled = false;
+        }
+      });
+    
+      // Update progress bar text
+      document.querySelectorAll('input[type="range"]').forEach(range => {
+        range.addEventListener('input', function() {
+          const percentageSpan = this.parentElement.querySelector('span');
+          if (percentageSpan) {
+            percentageSpan.textContent = `${this.value}%`;
+          }
+        });
+      });
+    
+      // Display initial message
+      displayMessage(messages[0]);
+    });
+    </script>
