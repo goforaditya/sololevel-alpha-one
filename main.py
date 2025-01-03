@@ -27,7 +27,6 @@ from database import engine, get_db, Base
 from models import User, Entry, Activity
 from auth import (get_password_hash, verify_password, 
                  create_access_token, get_current_user,
-from logs import log_message
                  ACCESS_TOKEN_EXPIRE_MINUTES)
 
 # Add these at the top with other imports
