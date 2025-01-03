@@ -3,6 +3,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi import Body
 from sqlalchemy.orm import Session
 from datetime import timedelta
 from typing import Optional, Union
