@@ -7,7 +7,7 @@ from fastapi import Body
 from sqlalchemy.orm import Session
 from datetime import timedelta
 from typing import Optional, Union
-import openai
+from openai import OpenAI
 import os
 # Add at the top with other imports
 import time
@@ -198,14 +198,15 @@ async def create_entry(
     # Only generate suggestions for logged-in users
     if current_user:
         # Generate activity suggestions using OpenAI
-        response = openai.ChatCompletion.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": "You are a helpful assistant that suggests 3 concrete, actionable activities based on journal entries. Keep suggestions specific and measurable."},
-                    {"role": "user", "content": content}
-                ]
-            )
-        
+        client = OpenAI()
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            store=True,
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant that suggests 3 concrete, actionable activities based on journal entries. Keep suggestions specific and measurable."},
+                {"role": "user", "content": content}]
+        )
+        print(response)
         suggestions = response.choices[0].message.content.split('\n')
         # Your existing OpenAI suggestion code here
         # Create activities from suggestions
@@ -288,13 +289,15 @@ async def generate_entry(
     current_user: Union[User, None] = Depends(get_current_user)
 ):
     try:
-        response = openai.ChatCompletion.create(
+        client = OpenAI()
+        response = client.chat.completions.create(
             model="gpt-4o",
+            store=True,
             messages=[
                 {"role": "system", "content": "You are a helpful assistant that helps users journal their day. Convert their chat messages into a well-formatted journal entry."},
-                *messages
-            ]
+                *messages]
         )
+        print(response)
         return {"entry": response.choices[0].message.content}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
