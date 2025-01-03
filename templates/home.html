@@ -3,6 +3,15 @@
 {% block content %}
 <div class="container mx-auto px-4 py-8">
   <div class="max-w-3xl mx-auto space-y-8">
+    <!-- Chat Interface -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <div id="chat-messages" class="h-64 overflow-y-auto space-y-2 mb-4 border rounded p-2"></div>
+      <div class="flex gap-2">
+        <input type="text" id="message-input" class="flex-1 p-2 border rounded" placeholder="Tell me about your day...">
+        <button onclick="sendMessage()" class="bg-blue-500 text-white px-4 py-2 rounded">Send</button>
+      </div>
+      <button onclick="createEntry()" class="mt-4 bg-green-500 text-white px-4 py-2 rounded">Create Entry</button>
+    </div>
     <!-- New Entry Section -->
     <div class="bg-white rounded-lg shadow p-6">
       <h2 class="text-2xl font-bold mb-4">New Entry</h2>
@@ -71,4 +80,61 @@
     </div>
   </div>
 </div>
+
+<script>
+const messages = [];
+
+async function sendMessage() {
+    const input = document.getElementById('message-input');
+    const message = input.value;
+    if (!message) return;
+
+    messages.push({"role": "user", "content": message});
+    displayMessage("user", message);
+    input.value = '';
+
+    try {
+        const response = await fetch('/chat/entry', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ messages })
+        });
+        const data = await response.json();
+        displayMessage("assistant", data.entry);
+        messages.push({"role": "assistant", "content": data.entry});
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+async function createEntry() {
+    const lastEntry = messages[messages.length - 1].content;
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/entries';
+    
+    const content = document.createElement('input');
+    content.type = 'hidden';
+    content.name = 'content';
+    content.value = lastEntry;
+    
+    form.appendChild(content);
+    document.body.appendChild(form);
+    form.submit();
+}
+
+function displayMessage(role, content) {
+    const chatMessages = document.getElementById('chat-messages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = role === 'user' ? 'text-right' : 'text-left';
+    messageDiv.innerHTML = `
+        <div class="inline-block ${role === 'user' ? 'bg-blue-100' : 'bg-gray-100'} rounded-lg p-2 max-w-3/4">
+            ${content}
+        </div>
+    `;
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+</script>
+
 {% endblock %}
