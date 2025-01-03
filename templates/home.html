@@ -1,7 +1,5 @@
 {% extends "base.html" %}
-
 {% block title %}Home{% endblock %}
-
 {% block content %}
 <div class="container">
     <section class="entry-form">
@@ -26,34 +24,47 @@
     </section>
 
     <section class="entries">
-        <h2>Your Entries</h2>
-        {% for entry in entries %}
-        <div class="entry-card">
-            <div class="entry-content">{{ entry.content }}</div>
-            <div class="entry-meta">
-                <span>{{ entry.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
-                {% if entry.is_public %}
-                    <span class="public-badge">Public</span>
+        {% if user %}
+            <h2>Your Entries</h2>
+            {% for entry in entries %}
+            <div class="entry-card">
+                <div class="entry-content">{{ entry.content }}</div>
+                <div class="entry-meta">
+                    <span>{{ entry.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                    {% if entry.is_public %}
+                        <span class="public-badge">Public</span>
+                    {% endif %}
+                </div>
+                
+                {% if entry.activities %}
+                <div class="activities">
+                    <h3>Suggested Activities:</h3>
+                    {% for activity in entry.activities %}
+                    <div class="activity-card">
+                        <p>{{ activity.description }}</p>
+                        <form action="/activities/{{ activity.id }}/progress" method="POST">
+                            <input type="range" name="progress" min="0" max="100" value="{{ activity.progress }}">
+                            <input type="text" name="notes" placeholder="Add notes (optional)" value="{{ activity.notes or '' }}">
+                            <button type="submit">Update Progress</button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
                 {% endif %}
             </div>
-            
-            {% if entry.activities %}
-            <div class="activities">
-                <h3>Suggested Activities:</h3>
-                {% for activity in entry.activities %}
-                <div class="activity-card">
-                    <p>{{ activity.description }}</p>
-                    <form action="/activities/{{ activity.id }}/progress" method="POST">
-                        <input type="range" name="progress" min="0" max="100" value="{{ activity.progress }}">
-                        <input type="text" name="notes" placeholder="Add notes (optional)" value="{{ activity.notes or '' }}">
-                        <button type="submit">Update Progress</button>
-                    </form>
+            {% endfor %}
+        {% else %}
+            <h2>Public Entries</h2>
+            {% for entry in public_entries %}
+            <div class="entry-card">
+                <div class="entry-content">{{ entry.content }}</div>
+                <div class="entry-meta">
+                    <span>{{ entry.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                    <span class="public-badge">Public</span>
                 </div>
-                {% endfor %}
             </div>
-            {% endif %}
-        </div>
-        {% endfor %}
+            {% endfor %}
+        {% endif %}
     </section>
 </div>
 {% endblock %}
