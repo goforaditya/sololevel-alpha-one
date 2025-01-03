@@ -54,20 +54,24 @@ templates = Jinja2Templates(directory="templates")
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 @app.get("/", response_class=HTMLResponse)
+@app.get("/", response_class=HTMLResponse)
 async def home(request: Request, current_user: Union[User, None] = Depends(get_current_user)):
     db = next(get_db())
+    user_entries = []
+    public_entries = db.query(Entry).filter(Entry.is_public == True).order_by(Entry.created_at.desc()).limit(10).all()
+    
     if current_user:
-        entries = db.query(Entry).filter(Entry.user_id == current_user.id).order_by(Entry.created_at.desc()).all()
-        return templates.TemplateResponse(
-            "home.html", 
-            {"request": request, "user": current_user, "entries": entries}
-        )
-    else:
-        public_entries = db.query(Entry).filter(Entry.is_public == True).order_by(Entry.created_at.desc()).limit(10).all()
-        return templates.TemplateResponse(
-            "home.html", 
-            {"request": request, "user": None, "public_entries": public_entries}
-        )
+        user_entries = db.query(Entry).filter(Entry.user_id == current_user.id).order_by(Entry.created_at.desc()).all()
+    
+    return templates.TemplateResponse(
+        "home.html", 
+        {
+            "request": request, 
+            "user": current_user, 
+            "user_entries": user_entries,
+            "public_entries": public_entries
+        }
+    )
 
 # Login route
 @app.get("/login", response_class=HTMLResponse)
