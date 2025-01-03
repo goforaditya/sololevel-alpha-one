@@ -199,11 +199,12 @@ document.addEventListener('DOMContentLoaded', function() {
         { role: 'assistant', content: "Hi! I'm here to help. How are you feeling today?" }
     ];
 
+    // Function to display a message
     function displayMessage(message) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `max-w-[85%] sm:max-w-[80%] rounded-lg p-3 text-sm sm:text-base ${
             message.role === 'user' 
-                ? 'bg-blue-600 text-white' 
+                ? 'bg-blue-600 text-white ml-auto' 
                 : 'bg-white border text-gray-800'
         }`;
         messageDiv.textContent = message.content;
@@ -211,12 +212,8 @@ document.addEventListener('DOMContentLoaded', function() {
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    // Display initial message
-    displayMessage(messages[0]);
-
-    // Enhanced chat form handling
-    chatForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
+    // Function to handle message submission
+    async function handleSubmit() {
         const message = messageInput.value.trim();
         if (!message) return;
 
@@ -265,53 +262,78 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         } finally {
             submitButton.disabled = false;
+            // Reset textarea height
+            messageInput.style.height = 'auto';
+        }
+    }
+
+    // Handle form submission
+    chatForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        handleSubmit();
+    });
+
+    // Handle Enter key press
+    messageInput.addEventListener('keydown', (e) => {
+        // Check if it's Enter without Shift
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault(); // Prevent default to avoid new line
+            handleSubmit();
         }
     });
 
+    // Auto-resize textarea as user types
+    messageInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
+
+    // Display initial message
+    displayMessage(messages[0]);
     // Handle entry form submission
     // Fixed entry form submission
-  const entryForm = document.getElementById('entry-form');
-  entryForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      // Add loading state
-      const submitButton = entryForm.querySelector('button[type="submit"]');
-      const originalButtonText = submitButton.textContent;
-      submitButton.textContent = 'Saving...';
-      submitButton.disabled = true;
+    const entryForm = document.getElementById('entry-form');
+    entryForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // Add loading state
+        const submitButton = entryForm.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton.textContent;
+        submitButton.textContent = 'Saving...';
+        submitButton.disabled = true;
 
-      try {
-          const formData = new FormData();
-          formData.append('content', simplemde.value()); // Get content from SimpleMDE
-          formData.append('is_public', document.querySelector('input[name="is_public"]').checked);
+        try {
+            const formData = new FormData();
+            formData.append('content', simplemde.value()); // Get content from SimpleMDE
+            formData.append('is_public', document.querySelector('input[name="is_public"]').checked);
 
-          const response = await fetch('/entries', {
-              method: 'POST',
-              body: formData
-          });
+            const response = await fetch('/entries', {
+                method: 'POST',
+                body: formData
+            });
 
-          console.log('Response status:', response.status);
-          const data = await response.json();
-          console.log('Response data:', data);
+            console.log('Response status:', response.status);
+            const data = await response.json();
+            console.log('Response data:', data);
 
-          if (!response.ok) {
-              throw new Error(data.message || 'Failed to save entry');
-          }
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to save entry');
+            }
 
-          // Success handling
-          alert('Entry saved successfully!');
-          simplemde.value(''); // Clear the editor
-          document.querySelector('input[name="is_public"]').checked = false;
+            // Success handling
+            alert('Entry saved successfully!');
+            simplemde.value(''); // Clear the editor
+            document.querySelector('input[name="is_public"]').checked = false;
 
-      } catch (error) {
-          console.error('Error saving entry:', error);
-          alert(`Error saving entry: ${error.message}`);
-      } finally {
-          // Reset button state
-          submitButton.textContent = originalButtonText;
-          submitButton.disabled = false;
-      }
-  });
+        } catch (error) {
+            console.error('Error saving entry:', error);
+            alert(`Error saving entry: ${error.message}`);
+        } finally {
+            // Reset button state
+            submitButton.textContent = originalButtonText;
+            submitButton.disabled = false;
+        }
+    });
 });
 </script>
 
