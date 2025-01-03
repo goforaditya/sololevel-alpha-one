@@ -230,7 +230,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             console.log('Sending message:', { messages });
 
-            const response = await fetch('/chat', {
+            const response = await fetch('/chat/entry', {  // Updated endpoint
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -239,7 +239,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             console.log('Response status:', response.status);
-            const data = await response.json();
+            const data = await response.text();
             console.log('Response data:', data);
 
             if (!response.ok) {

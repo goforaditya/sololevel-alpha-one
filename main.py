@@ -15,6 +15,13 @@ import hashlib
 import time
 # from recaptcha import verify_recaptcha
 
+from fastapi import Depends
+from typing import List, Dict
+from pydantic import BaseModel
+from openai import OpenAI
+import logging
+
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -298,32 +305,45 @@ async def update_progress(
     db.commit()
     return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
 
+# Add a model for the chat messages
+class ChatMessage(BaseModel):
+    role: str
+    content: str
+
 @app.post("/chat/entry")
 async def generate_entry(
     request: Request,
-    messages: list = Body(...),
+    messages: List[ChatMessage] = Body(...),
     current_user: Union[User, None] = Depends(get_current_user)
 ):
-    
-    logger.info(f"Received request for chat entry generation: {messages}")
+    logger.info(f"Received request for chat entry generation from user: {current_user.username if current_user else 'anonymous'}")
+    logger.info(f"Messages received: {messages}")
 
     try:
         client = OpenAI()
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "system", 
-                 "content": "You are a helpful assistant that helps users journal their day. Convert their chat messages into a well-formatted journal entry."
-                }, 
-                *messages
-            ]
-        )
-        logger.info(f"OpenAI response: {response}")
         
-        return response.choices[0].message.content  # Return plain text
+        # Convert messages to the format OpenAI expects
+        formatted_messages = [
+            {"role": "system", 
+             "content": "You are a helpful assistant that helps users journal their day. Convert their chat messages into a well-formatted journal entry."
+            }
+        ]
+        formatted_messages.extend([{"role": msg.role, "content": msg.content} for msg in messages])
+        
+        response = client.chat.completions.create(
+            model="gpt-4",  # Fixed typo in model name
+            messages=formatted_messages
+        )
+        
+        logger.info("Successfully generated response from OpenAI")
+        return response.choices[0].message.content
+        
     except Exception as e:
-        logger.error(f"Error generating entry: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Error generating entry: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate entry: {str(e)}"
+        )
 
 @app.post("/entries/{entry_id}/comments")
 async def create_comment(
