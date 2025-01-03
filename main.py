@@ -8,15 +8,26 @@ from sqlalchemy.orm import Session
 from datetime import timedelta
 from typing import Optional, Union
 from openai import OpenAI
+import logging
 import os
+import hashlib
 # Add at the top with other imports
 import time
 # from recaptcha import verify_recaptcha
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler(), logging.FileHandler("app.log")]
+)
+logger = logging.getLogger(__name__)
 
 from database import engine, get_db, Base
 from models import User, Entry, Activity
 from auth import (get_password_hash, verify_password, 
                  create_access_token, get_current_user,
+from logs import log_message
                  ACCESS_TOKEN_EXPIRE_MINUTES)
 
 # Add these at the top with other imports
@@ -286,16 +297,23 @@ async def generate_entry(
     messages: list = Body(...),
     current_user: Union[User, None] = Depends(get_current_user)
 ):
+    
+    logger.info(f"Received request for chat entry generation: {messages}")
+
     try:
         client = OpenAI()
         response = client.chat.completions.create(
             model="gpt-4o",
-            store=True,
             messages=[
-                {"role": "system", "content": "You are a helpful assistant that helps users journal their day. Convert their chat messages into a well-formatted journal entry."},
-                *messages]
+                {"role": "system", 
+                 "content": "You are a helpful assistant that helps users journal their day. Convert their chat messages into a well-formatted journal entry."
+                }, 
+                *messages
+            ]
         )
-        print(response)
-        return {"entry": response.choices[0].message.content}
+        logger.info(f"OpenAI response: {response}")
+        
+        return response.choices[0].message.content  # Return plain text
     except Exception as e:
+        logger.error(f"Error generating entry: {e}")
         raise HTTPException(status_code=500, detail=str(e))
