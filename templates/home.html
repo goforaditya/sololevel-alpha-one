@@ -228,14 +228,14 @@ document.addEventListener('DOMContentLoaded', function() {
             displayMessage(userMessage);
             messageInput.value = '';
 
-            console.log('Sending message:', { messages });
+            console.log('Sending messages:', messages);
 
-            const response = await fetch('/chat/entry', {  // Updated endpoint
+            const response = await fetch('/chat/entry', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ messages })
+                body: JSON.stringify(messages)  // Send messages array directly
             });
 
             console.log('Response status:', response.status);
@@ -243,13 +243,13 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Response data:', data);
 
             if (!response.ok) {
-                throw new Error(data.error || 'Failed to get response');
+                throw new Error(data || 'Failed to get response');
             }
 
             // Add assistant's response
             const assistantMessage = { 
                 role: 'assistant', 
-                content: data.response 
+                content: data 
             };
             messages.push(assistantMessage);
             displayMessage(assistantMessage);
@@ -262,7 +262,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         } finally {
             submitButton.disabled = false;
-            // Reset textarea height
             messageInput.style.height = 'auto';
         }
     }
