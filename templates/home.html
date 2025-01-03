@@ -199,15 +199,13 @@ document.addEventListener('DOMContentLoaded', function() {
         { role: 'assistant', content: "Hi! I'm here to help. How are you feeling today?" }
     ];
 
-    // Function to display a message
     function displayMessage(message) {
         const messageDiv = document.createElement('div');
-        // messageDiv.className = `p-2 rounded ${message.role === 'assistant' ? 'bg-blue-50' : 'bg-gray-50'}`;
         messageDiv.className = `max-w-[85%] sm:max-w-[80%] rounded-lg p-3 text-sm sm:text-base ${
-            role === 'user' 
+            message.role === 'user' 
                 ? 'bg-blue-600 text-white' 
                 : 'bg-white border text-gray-800'
-        }`
+        }`;
         messageDiv.textContent = message.content;
         chatMessages.appendChild(messageDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -216,73 +214,104 @@ document.addEventListener('DOMContentLoaded', function() {
     // Display initial message
     displayMessage(messages[0]);
 
-    // Handle chat form submission
+    // Enhanced chat form handling
     chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const message = messageInput.value.trim();
         if (!message) return;
 
-        // Add user message to UI and messages array
-        const userMessage = { role: 'user', content: message };
-        messages.push(userMessage);
-        displayMessage(userMessage);
-        messageInput.value = '';
+        // Disable form while processing
+        const submitButton = chatForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
 
         try {
-            // Send chat history to backend
+            // Add user message
+            const userMessage = { role: 'user', content: message };
+            messages.push(userMessage);
+            displayMessage(userMessage);
+            messageInput.value = '';
+
+            console.log('Sending message:', { messages });
+
             const response = await fetch('/chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ messages: messages })
+                body: JSON.stringify({ messages })
             });
 
+            console.log('Response status:', response.status);
             const data = await response.json();
-            
-            // Add assistant's response to UI and messages array
-            // const assistantMessage = { role: 'assistant', content: data.response | "Sorry OpenAI Error" };
+            console.log('Response data:', data);
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to get response');
+            }
+
+            // Add assistant's response
             const assistantMessage = { 
                 role: 'assistant', 
-                content: data.error ? "Sorry, there was an error: " + data.error : data.response 
+                content: data.response 
             };
             messages.push(assistantMessage);
             displayMessage(assistantMessage);
 
         } catch (error) {
-            console.error('Error:', error);
-            displayMessage({ role: 'assistant', content: 'Sorry, there was an error. Please try again.' + error });
+            console.error('Chat error:', error);
+            displayMessage({ 
+                role: 'assistant', 
+                content: `Sorry, there was an error: ${error.message}` 
+            });
+        } finally {
+            submitButton.disabled = false;
         }
     });
 
     // Handle entry form submission
-    const entryForm = document.getElementById('entry-form');
-    entryForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = new FormData();
-        formData.append('content', document.getElementById('markdown-editor').value);
-        formData.append('entry_type', document.getElementById('type').value);
-        formData.append('is_public', document.getElementById('is_public').checked);
+    // Fixed entry form submission
+  const entryForm = document.getElementById('entry-form');
+  entryForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Add loading state
+      const submitButton = entryForm.querySelector('button[type="submit"]');
+      const originalButtonText = submitButton.textContent;
+      submitButton.textContent = 'Saving...';
+      submitButton.disabled = true;
 
-        try {
-            const response = await fetch('/entries', {
-                method: 'POST',
-                body: formData
-            });
+      try {
+          const formData = new FormData();
+          formData.append('content', simplemde.value()); // Get content from SimpleMDE
+          formData.append('is_public', document.querySelector('input[name="is_public"]').checked);
 
-            const data = await response.json();
-            console.log('Success:', data);
-            alert('Entry saved successfully!');
+          const response = await fetch('/entries', {
+              method: 'POST',
+              body: formData
+          });
 
-            // Clear form
-            document.getElementById('content').value = '';
-            document.getElementById('is_public').checked = false;
+          console.log('Response status:', response.status);
+          const data = await response.json();
+          console.log('Response data:', data);
 
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Error saving entry. Please try again.');
-        }
-    });
+          if (!response.ok) {
+              throw new Error(data.message || 'Failed to save entry');
+          }
+
+          // Success handling
+          alert('Entry saved successfully!');
+          simplemde.value(''); // Clear the editor
+          document.querySelector('input[name="is_public"]').checked = false;
+
+      } catch (error) {
+          console.error('Error saving entry:', error);
+          alert(`Error saving entry: ${error.message}`);
+      } finally {
+          // Reset button state
+          submitButton.textContent = originalButtonText;
+          submitButton.disabled = false;
+      }
+  });
 });
 </script>
 
